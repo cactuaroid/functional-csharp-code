@@ -38,7 +38,7 @@ namespace Exercises.Chapter3
         {
             foreach (var item in enumerable)
             {
-                if (predicate(item)) { return Some(item); }
+                if (predicate(item)) { return item; }
             }
 
             return None;
@@ -65,7 +65,7 @@ namespace Exercises.Chapter3
             private static bool IsValid(string value)
                 => Regex.IsMatch(value, ".+@.+"); // whatever
 
-            public static implicit operator string (Email email)
+            public static implicit operator string(Email email)
                 => email.Value;
         }
 
@@ -73,6 +73,18 @@ namespace Exercises.Chapter3
         // Which ones could potentially return nothing, or throw some
         // kind of not-found exception, and would therefore be good candidates for
         // returning an Option<T> instead?
+
+        public static Option<T> ElementAt2<T>(this IEnumerable<T> enumerable, int index)
+        {
+            var enumerator = enumerable.GetEnumerator();
+
+            for (int i = 0; i < index; i++)
+            {
+                if (!enumerator.MoveNext()) { return None; }
+            }
+
+            return enumerator.Current;
+        }
     }
 
     // 5.  Write implementations for the methods in the `AppConfig` class
@@ -92,13 +104,13 @@ namespace Exercises.Chapter3
         }
 
         public Option<T> Get<T>(string name)
-        {
-            throw new NotImplementedException("your implementation here...");
-        }
+            => source[name] is null
+                ? None
+                : Some((T)Convert.ChangeType(source[name], typeof(T)));
 
         public T Get<T>(string name, T defaultValue)
-        {
-            throw new NotImplementedException("your implementation here...");
-        }
+            => Get<T>(name).Match(
+                () => defaultValue,
+                (x) => x);
     }
 }
